@@ -1,0 +1,19 @@
+package com.dev.marketplace.api.response.dto;
+
+public record ListingResponse(String id,
+    String sellerId,
+    String title,
+    String description,
+    double price,
+    String currency,
+    boolean negotiable,
+    String category,
+    String subcategory,
+    String condition,
+    java.util.List<String> images,
+    String suburb,
+    String state,
+    String status,
+    int views,
+    int favoritesCount,
+    java.time.Instant createdAt) {}

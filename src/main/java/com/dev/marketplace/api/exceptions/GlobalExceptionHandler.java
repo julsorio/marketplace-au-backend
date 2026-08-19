@@ -14,21 +14,19 @@ import com.dev.marketplace.api.response.dto.ErrorResponse;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-// 409 - email ya registrado
+    // 409 - email ya registrado
     @ExceptionHandler(EmailAlreadyExistsException.class)
     public ResponseEntity<ErrorResponse> handleEmailExists(EmailAlreadyExistsException ex) {
         ErrorResponse error = new ErrorResponse(
-            HttpStatus.CONFLICT.value(), "Conflict", ex.getMessage()
-        );
+                HttpStatus.CONFLICT.value(), "Conflict", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 
     // 401 - credenciales inválidas
-    @ExceptionHandler({InvalidCredentialsException.class, BadCredentialsException.class})
+    @ExceptionHandler({ InvalidCredentialsException.class, BadCredentialsException.class })
     public ResponseEntity<ErrorResponse> handleInvalidCredentials(RuntimeException ex) {
         ErrorResponse error = new ErrorResponse(
-            HttpStatus.UNAUTHORIZED.value(), "Unauthorized", ex.getMessage()
-        );
+                HttpStatus.UNAUTHORIZED.value(), "Unauthorized", ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
     }
 
@@ -36,20 +34,18 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
         List<String> details = ex.getBindingResult().getFieldErrors().stream()
-            .map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
-            .toList();
+                .map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
+                .toList();
 
         ErrorResponse error = new ErrorResponse(
-            HttpStatus.BAD_REQUEST.value(), "Bad Request", "Error de validación en los datos enviados", details
-        );
+                HttpStatus.BAD_REQUEST.value(), "Bad Request", "Error de validación en los datos enviados", details);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
     @ExceptionHandler(InvalidRefreshTokenException.class)
     public ResponseEntity<ErrorResponse> handleInvalidRefreshToken(InvalidRefreshTokenException ex) {
         ErrorResponse error = new ErrorResponse(
-            HttpStatus.UNAUTHORIZED.value(), "Unauthorized", ex.getMessage()
-        );
+                HttpStatus.UNAUTHORIZED.value(), "Unauthorized", ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
     }
 
@@ -57,10 +53,21 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneric(Exception ex, WebRequest request) {
         ErrorResponse error = new ErrorResponse(
-            HttpStatus.INTERNAL_SERVER_ERROR.value(),
-            "Internal Server Error",
-            "Ha ocurrido un error inesperado. Inténtalo de nuevo más tarde."
-        );
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "Internal Server Error",
+                "Ha ocurrido un error inesperado. Inténtalo de nuevo más tarde.");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+    }
+
+    @ExceptionHandler(ListingNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleListingNotFound(ListingNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse(HttpStatus.NOT_FOUND.value(), "Not Found", ex.getMessage()));
+    }
+
+    @ExceptionHandler(UnauthorizedListingAccessException.class)
+    public ResponseEntity<ErrorResponse> handleUnauthorizedListing(UnauthorizedListingAccessException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ErrorResponse(HttpStatus.FORBIDDEN.value(), "Forbidden", ex.getMessage()));
     }
 }
