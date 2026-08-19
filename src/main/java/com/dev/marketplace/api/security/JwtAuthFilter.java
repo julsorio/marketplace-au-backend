@@ -3,13 +3,12 @@ package com.dev.marketplace.api.security;
 import java.io.IOException;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.dev.marketplace.api.model.User;
-import com.dev.marketplace.api.repository.UserRepository;
 import com.dev.marketplace.api.service.JwtService;
 
 import jakarta.servlet.FilterChain;
@@ -23,7 +22,8 @@ import lombok.RequiredArgsConstructor;
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-    private final UserRepository userRepository;
+    private final CustomUserDetailsService userDetailsService;
+
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -38,14 +38,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         if (jwtService.isTokenValid(token)) {
             String userId = jwtService.extractUserId(token);
-            User user = userRepository.findById(userId).orElse(null);
-
-            if (user != null) {
-                var auth = new UsernamePasswordAuthenticationToken(
-                    user, null,
-                    user.getRoles().stream().map(SimpleGrantedAuthority::new).toList()
-                );
-                SecurityContextHolder.getContext().setAuthentication(auth);
+            
+            try {
+                UserDetails userDetails = userDetailsService.loadUserById(userId);
+                
+                SecurityContextHolder.getContext()
+                .setAuthentication(new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities()));
+            } catch (UsernameNotFoundException  e) {
+            
             }
         }
 
