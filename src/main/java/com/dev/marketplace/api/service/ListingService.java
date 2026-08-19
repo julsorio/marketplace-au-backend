@@ -7,11 +7,12 @@ import java.util.List;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.stereotype.Service;
 
+import com.dev.marketplace.api.exceptions.CategoryNotFoundException;
 import com.dev.marketplace.api.exceptions.ListingNotFoundException;
 import com.dev.marketplace.api.exceptions.UnauthorizedListingAccessException;
 import com.dev.marketplace.api.model.Listing;
 import com.dev.marketplace.api.model.Price;
-import com.dev.marketplace.api.repository.LIstingSearchRepository;
+import com.dev.marketplace.api.repository.ListingSearchRepository;
 import com.dev.marketplace.api.repository.ListingRepository;
 import com.dev.marketplace.api.request.dto.CreateListingRequest;
 import com.dev.marketplace.api.request.dto.ListingSearchRequest;
@@ -25,11 +26,17 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ListingService {
     private final ListingRepository listingRepository;
-    private final LIstingSearchRepository listingSearchRepository;
+    private final ListingSearchRepository listingSearchRepository;
+    private final CategoryService categoryService;
 
     private static final long LISTING_EXPIRATION_DAYS = 30;
 
     public ListingResponse create(String sellerId, CreateListingRequest request) {
+
+        if(!categoryService.categoryExists(request.category())) {
+            throw new CategoryNotFoundException(request.category());
+        }
+
         Listing listing = new Listing();
         listing.setSellerId(sellerId);
         listing.setTitle(request.title());

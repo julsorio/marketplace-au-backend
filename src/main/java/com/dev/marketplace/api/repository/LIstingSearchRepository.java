@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 
 @Repository
 @RequiredArgsConstructor
-public class LIstingSearchRepository {
+public class ListingSearchRepository {
     private final MongoTemplate mongoTemplate;
 
     private static final double EARTH_RADIUS_KM = 6378.1;
