@@ -12,4 +12,6 @@ public interface TransactionRepository extends MongoRepository<Transaction, Stri
     List<Transaction> findBySellerIdOrderByCreatedAtDesc(String sellerId);
 
     boolean existsByListingIdAndStatus(String listingId, String status);
+
+    boolean existsByListingIdAndStatusAndSellerIdAndBuyerId(String listingId, String status, String sellerId, String buyerId);
 }
