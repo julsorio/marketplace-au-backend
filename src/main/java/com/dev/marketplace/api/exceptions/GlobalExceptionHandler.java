@@ -88,4 +88,22 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(new ErrorResponse(HttpStatus.FORBIDDEN.value(), "Forbidden", ex.getMessage()));
     }
+
+    @ExceptionHandler(TransactionNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleTransactionNotFound(TransactionNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse(HttpStatus.NOT_FOUND.value(), "Not Found", ex.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidListingStateException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidListingState(InvalidListingStateException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ErrorResponse(HttpStatus.CONFLICT.value(), "Conflict", ex.getMessage()));
+    }
+
+    @ExceptionHandler(UnauthorizedTransactionAccessException.class)
+    public ResponseEntity<ErrorResponse> handleUnauthorizedTransaction(UnauthorizedTransactionAccessException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ErrorResponse(HttpStatus.FORBIDDEN.value(), "Forbidden", ex.getMessage()));
+    }
 }
