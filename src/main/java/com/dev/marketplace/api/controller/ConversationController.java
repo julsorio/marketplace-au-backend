@@ -39,6 +39,13 @@ public class ConversationController {
         return ResponseEntity.ok(conversationService.getConversationsForUser(principal.getUserId()));
     }
 
+    @GetMapping("/conversations/{id}")
+    public ResponseEntity<ConversationResponse> getConversation(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable String id) {
+        return ResponseEntity.ok(conversationService.getConversation(id, principal.getUserId()));
+    }
+
     @GetMapping("/conversations/{id}/messages")
     public ResponseEntity<List<MessageResponse>> getMessages(
             @AuthenticationPrincipal UserPrincipal principal,
