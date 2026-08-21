@@ -19,6 +19,7 @@ import com.dev.marketplace.api.request.dto.ListingSearchRequest;
 import com.dev.marketplace.api.request.dto.UpdateListingRequest;
 import com.dev.marketplace.api.request.dto.UpdateListingStatusRequest;
 import com.dev.marketplace.api.response.dto.ListingResponse;
+import com.dev.marketplace.api.util.LocationFuzzer;
 
 import lombok.RequiredArgsConstructor;
 
@@ -53,22 +54,22 @@ public class ListingService {
         listing.setExpiresAt(Instant.now().plus(LISTING_EXPIRATION_DAYS, ChronoUnit.DAYS));
 
         Listing saved = listingRepository.save(listing);
-        return toResponse(saved);
+        return toResponse(saved, sellerId);
     }
 
-    public ListingResponse getById(String id) {
+    public ListingResponse getById(String id, String viewerId) {
         Listing listing = listingRepository.findById(id)
                 .orElseThrow(() -> new ListingNotFoundException(id));
 
         listing.setViews(listing.getViews() + 1);
         listingRepository.save(listing);
 
-        return toResponse(listing);
+        return toResponse(listing, viewerId);
     }
 
-    public List<ListingResponse> search(ListingSearchRequest request) {
+    public List<ListingResponse> search(ListingSearchRequest request, String viewerId) {
         return listingSearchRepository.search(request).stream()
-                .map(this::toResponse)
+                .map(l -> toResponse(l, viewerId))
                 .toList();
     }
 
@@ -83,13 +84,31 @@ public class ListingService {
         listingRepository.deleteById(id);
     }
 
-    private ListingResponse toResponse(Listing l) {
+    // viewerId es el id del usuario autenticado que está viendo el listing (null si es
+    // anónimo). Solo el dueño ve la ubicación exacta; para cualquier otro se difumina.
+    private ListingResponse toResponse(Listing l, String viewerId) {
+        Double latitude = null;
+        Double longitude = null;
+
+        if (l.getLocation() != null) {
+            boolean isOwner = viewerId != null && viewerId.equals(l.getSellerId());
+            if (isOwner) {
+                // GeoJsonPoint guarda las coordenadas como (x, y) = (longitude, latitude)
+                latitude = l.getLocation().getY();
+                longitude = l.getLocation().getX();
+            } else {
+                double[] fuzzed = LocationFuzzer.fuzz(l.getLocation(), l.getId());
+                latitude = fuzzed[0];
+                longitude = fuzzed[1];
+            }
+        }
+
         return new ListingResponse(
                 l.getId(), l.getSellerId(), l.getTitle(), l.getDescription(),
                 l.getPrice().amount(), l.getPrice().currency(), l.getPrice().negotiable(),
                 l.getCategory(), l.getSubcategory(), l.getCondition(), l.getImages(),
-                l.getSuburb(), l.getState(), l.getStatus(), l.getViews(), l.getFavoritesCount(),
-                l.getCreatedAt());
+                l.getSuburb(), l.getState(), latitude, longitude, l.getStatus(), l.getViews(),
+                l.getFavoritesCount(), l.getCreatedAt());
     }
 
     public ListingResponse update(String id, String requesterId, UpdateListingRequest request) {
@@ -111,7 +130,7 @@ public class ListingService {
         listing.setUpdatedAt(Instant.now());
 
         Listing saved = listingRepository.save(listing);
-        return toResponse(saved);
+        return toResponse(saved, requesterId);
     }
 
     public ListingResponse updateStatus(String id, String requesterId, UpdateListingStatusRequest request) {
@@ -126,6 +145,6 @@ public class ListingService {
         listing.setUpdatedAt(Instant.now());
 
         Listing saved = listingRepository.save(listing);
-        return toResponse(saved);
+        return toResponse(saved, requesterId);
     }
 }

@@ -41,12 +41,16 @@ public class ListingController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ListingResponse> getById(@PathVariable String id) {
-        return ResponseEntity.ok(listingService.getById(id));
+    public ResponseEntity<ListingResponse> getById(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable String id) {
+        String viewerId = principal != null ? principal.getUserId() : null;
+        return ResponseEntity.ok(listingService.getById(id, viewerId));
     }
 
     @GetMapping
     public ResponseEntity<List<ListingResponse>> search(
+            @AuthenticationPrincipal UserPrincipal principal,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String condition,
             @RequestParam(required = false) Double minPrice,
@@ -62,7 +66,8 @@ public class ListingController {
         ListingSearchRequest request = new ListingSearchRequest(
                 category, condition, minPrice, maxPrice, state,
                 latitude, longitude, radiusKm, query, page, size);
-        return ResponseEntity.ok(listingService.search(request));
+        String viewerId = principal != null ? principal.getUserId() : null;
+        return ResponseEntity.ok(listingService.search(request, viewerId));
     }
 
     @DeleteMapping("/{id}")
