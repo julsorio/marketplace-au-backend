@@ -61,6 +61,17 @@ public class ConversationService {
                 .toList();
     }
 
+    public ConversationResponse getConversation(String id, String requesterId) {
+        Conversation conversation = conversationRepository.findById(id)
+                .orElseThrow(() -> new ConversationNotFoundException(id));
+
+        if (!conversation.getParticipants().contains(requesterId)) {
+            throw new UnauthorizedConversationAccessException();
+        }
+
+        return toConversationResponse(conversation, requesterId);
+    }
+
     public List<MessageResponse> getMessages(String conversationId, String requesterId) {
         Conversation conversation = conversationRepository.findById(conversationId)
                 .orElseThrow(() -> new ConversationNotFoundException(conversationId));
