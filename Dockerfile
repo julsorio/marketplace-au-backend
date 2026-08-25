@@ -42,7 +42,7 @@ COPY --from=build /app/target/*.jar app.jar
 # apuntando por accidente a un Mongo equivocado. Ver docker-compose.yml para un ejemplo de
 # cómo pasarlas en local; en AWS/GCP irían en el gestor de secretos de la plataforma
 # (ECS task definition / Cloud Run env vars + Secret Manager), no en texto plano en el repo.
-ENV SPRING_PROFILES_ACTIVE=main
+ENV SPRING_PROFILES_ACTIVE=dev
 
 EXPOSE 8002
 
