@@ -39,6 +39,7 @@ public class UserController {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
 
-        return ResponseEntity.ok(new UserPublicResponse(user.getId(), user.getDisplayName(), user.getAvatarUrl()));
+        return ResponseEntity.ok(
+                new UserPublicResponse(user.getId(), user.getDisplayName(), user.getAvatarUrl(), user.getRating()));
     }
 }

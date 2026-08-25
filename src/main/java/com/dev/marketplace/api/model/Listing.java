@@ -32,6 +32,8 @@ public class Listing {
 
     private String condition; // new | like_new | good | fair
 
+    private String deliveryMethod = "in_person"; // shipping | in_person | both
+
     private Map<String, Object> attributes;
 
     private List<String> images;
