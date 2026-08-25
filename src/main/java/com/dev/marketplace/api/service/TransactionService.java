@@ -24,27 +24,32 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final ListingRepository listingRepository;
 
-    public TransactionResponse reserve(String sellerId, ReserveTransactionRequest request) {
+    // requesterId es quien hace la petición, no necesariamente el vendedor: puede reservar
+    // tanto el vendedor (eligiendo a qué comprador, típicamente tras negociar por chat) como
+    // el propio comprador haciendo clic en "Comprar" directamente desde el anuncio. Se infiere
+    // el rol comparando requesterId con el dueño del anuncio; si no es el vendedor, se asume
+    // que es el comprador y se ignora cualquier buyerId distinto que llegue en el body.
+    public TransactionResponse reserve(String requesterId, ReserveTransactionRequest request) {
         Listing listing = listingRepository.findById(request.listingId())
                 .orElseThrow(() -> new ListingNotFoundException(request.listingId()));
-
-        if (!listing.getSellerId().equals(sellerId)) {
-            throw new UnauthorizedTransactionAccessException();
-        }
 
         if (!"active".equals(listing.getStatus())) {
             throw new InvalidListingStateException(
                     "El anuncio debe estar activo para reservarlo. Estado actual: " + listing.getStatus());
         }
 
-        if (sellerId.equals(request.buyerId())) {
+        boolean isSeller = listing.getSellerId().equals(requesterId);
+        String sellerId = listing.getSellerId();
+        String buyerId = isSeller ? request.buyerId() : requesterId;
+
+        if (sellerId.equals(buyerId)) {
             throw new InvalidListingStateException("El vendedor no puede ser también el comprador");
         }
 
         Transaction transaction = new Transaction();
         transaction.setListingId(request.listingId());
         transaction.setSellerId(sellerId);
-        transaction.setBuyerId(request.buyerId());
+        transaction.setBuyerId(buyerId);
         transaction.setAmount(request.amount());
         transaction.setCurrency("AUD");
         transaction.setPaymentMethod(request.paymentMethod());
