@@ -11,6 +11,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import com.dev.marketplace.api.exceptions.ConversationNotFoundException;
+import com.dev.marketplace.api.exceptions.SelfMessagingNotAllowedException;
 import com.dev.marketplace.api.exceptions.UnauthorizedConversationAccessException;
 import com.dev.marketplace.api.model.Conversation;
 import com.dev.marketplace.api.model.LastMessage;
@@ -31,6 +32,10 @@ public class ConversationService {
     private final MongoTemplate mongoTemplate;
 
     public MessageResponse sendMessage(String senderId, SendMessageRequest request) {
+        if (senderId.equals(request.recipientId())) {
+            throw new SelfMessagingNotAllowedException();
+        }
+
         Conversation conversation = findOrCreateConversation(
                 request.listingId(), senderId, request.recipientId());
 

@@ -22,6 +22,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import com.dev.marketplace.api.security.JwtAccessDeniedHandler;
 import com.dev.marketplace.api.security.JwtAuthFilter;
 import com.dev.marketplace.api.security.JwtAuthenticationEntryPoint;
+import com.dev.marketplace.api.security.RateLimitFilter;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final JwtAuthFilter jwtAuthFilter;
+    private final RateLimitFilter rateLimitFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
@@ -57,6 +59,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/user/me").authenticated()
                         .requestMatchers(HttpMethod.GET, "/user/{id}").permitAll()
                         .anyRequest().authenticated())
+                // El rate limiter va antes que el filtro JWT: si una IP ya superó el límite
+                // en /auth/login|register|refresh, ni siquiera merece la pena parsear un
+                // token que además esas rutas normalmente no traen.
+                .addFilterBefore(rateLimitFilter, JwtAuthFilter.class)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
