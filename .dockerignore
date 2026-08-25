@@ -1,0 +1,26 @@
+# Mismo criterio que .gitignore: no hace falta nada de esto dentro de la imagen, y excluirlo
+# acelera el build (menos contexto que enviar al daemon de Docker) y evita colar artefactos
+# de tu máquina (como target/ ya compilado) dentro del contenedor.
+target/
+HELP.md
+.git/
+.gitignore
+.gitattributes
+
+.idea/
+*.iws
+*.iml
+*.ipr
+.vscode/
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache/
+
+.mvn/wrapper/maven-wrapper.jar
+
+Dockerfile
+docker-compose.yml
+.dockerignore
