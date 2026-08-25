@@ -85,7 +85,7 @@ public class FavoriteService {
         return new ListingResponse(
                 l.getId(), l.getSellerId(), l.getTitle(), l.getDescription(),
                 l.getPrice().amount(), l.getPrice().currency(), l.getPrice().negotiable(),
-                l.getCategory(), l.getSubcategory(), l.getCondition(), l.getImages(),
+                l.getCategory(), l.getSubcategory(), l.getCondition(), l.getDeliveryMethod(), l.getImages(),
                 l.getSuburb(), l.getState(), latitude, longitude, l.getStatus(), l.getViews(),
                 l.getFavoritesCount(), l.getCreatedAt());
     }

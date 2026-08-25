@@ -46,6 +46,7 @@ public class ListingService {
         listing.setCategory(request.category());
         listing.setSubcategory(request.subcategory());
         listing.setCondition(request.condition());
+        listing.setDeliveryMethod(request.deliveryMethod());
         listing.setAttributes(request.attributes());
         listing.setImages(request.images());
         listing.setLocation(new GeoJsonPoint(request.longitude(), request.latitude()));
@@ -106,7 +107,7 @@ public class ListingService {
         return new ListingResponse(
                 l.getId(), l.getSellerId(), l.getTitle(), l.getDescription(),
                 l.getPrice().amount(), l.getPrice().currency(), l.getPrice().negotiable(),
-                l.getCategory(), l.getSubcategory(), l.getCondition(), l.getImages(),
+                l.getCategory(), l.getSubcategory(), l.getCondition(), l.getDeliveryMethod(), l.getImages(),
                 l.getSuburb(), l.getState(), latitude, longitude, l.getStatus(), l.getViews(),
                 l.getFavoritesCount(), l.getCreatedAt());
     }
@@ -125,6 +126,7 @@ public class ListingService {
         listing.setCategory(request.category());
         listing.setSubcategory(request.subcategory());
         listing.setCondition(request.condition());
+        listing.setDeliveryMethod(request.deliveryMethod());
         listing.setAttributes(request.attributes());
         listing.setImages(request.images());
         listing.setUpdatedAt(Instant.now());
