@@ -58,12 +58,14 @@ public class ListingService {
         return toResponse(saved, sellerId);
     }
 
-    public ListingResponse getById(String id, String viewerId) {
+    public ListingResponse getById(String id, String viewerId, boolean trackView) {
         Listing listing = listingRepository.findById(id)
                 .orElseThrow(() -> new ListingNotFoundException(id));
 
-        listing.setViews(listing.getViews() + 1);
-        listingRepository.save(listing);
+        if (trackView) {
+            listing.setViews(listing.getViews() + 1);
+            listingRepository.save(listing);
+        }
 
         return toResponse(listing, viewerId);
     }
