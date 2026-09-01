@@ -12,12 +12,21 @@ import com.dev.marketplace.api.service.CategoryService;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Endpoint REST de solo lectura para el árbol de categorías del marketplace.
+ * Delega toda la lógica en {@link CategoryService}.
+ */
 @RestController
 @RequestMapping("/categories")
 @RequiredArgsConstructor
 public class CategoryController {
     private final CategoryService categoryService;
 
+    /**
+     * Devuelve el árbol completo de categorías (categorías raíz con sus subcategorías anidadas).
+     *
+     * @return la lista de categorías raíz, cada una con su lista de subcategorías
+     */
     @GetMapping
     public ResponseEntity<List<CategoryResponse>> getCategoryTree() {
         return ResponseEntity.ok(categoryService.getCategoryTree());

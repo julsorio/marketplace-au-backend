@@ -20,12 +20,22 @@ import com.dev.marketplace.api.service.ReviewService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Expone los endpoints REST para crear reseñas y consultar las reseñas recibidas por un usuario.
+ */
 @RestController
 @RequestMapping("/reviews")
 @RequiredArgsConstructor
 public class ReviewController {
     private final ReviewService reviewService;
 
+    /**
+     * Crea una reseña del usuario autenticado hacia otro usuario, asociada a un listing.
+     *
+     * @param principal usuario autenticado que escribe la reseña
+     * @param request datos de la reseña (listing, usuario reseñado, puntuación y comentario)
+     * @return 201 Created con la reseña creada
+     */
     @PostMapping
     public ResponseEntity<ReviewResponse> create(
             @AuthenticationPrincipal UserPrincipal principal,
@@ -34,6 +44,12 @@ public class ReviewController {
                 .body(reviewService.createReview(principal.getUserId(), request));
     }
 
+    /**
+     * Obtiene las reseñas recibidas por un usuario.
+     *
+     * @param userId id del usuario reseñado
+     * @return 200 OK con la lista de reseñas recibidas
+     */
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<ReviewResponse>> getReviewsForUser(@PathVariable String userId) {
         return ResponseEntity.ok(reviewService.getReviewsForUser(userId));

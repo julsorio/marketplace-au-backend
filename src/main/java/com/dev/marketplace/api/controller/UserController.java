@@ -17,12 +17,24 @@ import com.dev.marketplace.api.security.UserPrincipal;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Controller REST con los endpoints relativos al usuario: el perfil propio del usuario
+ * autenticado y el perfil público de cualquier usuario dado su id.
+ */
 @RestController
 @RequestMapping("/user")
 @RequiredArgsConstructor
 public class UserController {
     private final UserRepository userRepository;
 
+    /**
+     * Devuelve el resumen del usuario actualmente autenticado, incluyendo su email.
+     * Los datos se toman directamente del {@link UserPrincipal} inyectado por Spring Security,
+     * sin necesidad de volver a consultar la base de datos.
+     *
+     * @param principal usuario autenticado, resuelto a partir del token de la petición
+     * @return HTTP 200 (OK) con id, email, nombre a mostrar y avatar del usuario
+     */
     @GetMapping("/me")
     public ResponseEntity<UserSummary> me(@AuthenticationPrincipal UserPrincipal principal) {
         User user = principal.getUser();
@@ -30,10 +42,16 @@ public class UserController {
         return ResponseEntity.ok(new UserSummary(user.getId(), user.getEmail(), user.getDisplayName(), user.getAvatarUrl()));
     }
 
-    // Perfil público mínimo (sin email ni otros datos sensibles), para mostrar quién es el
-    // otro participante de una conversación o el vendedor de un anuncio. Público a propósito
-    // (ver SecurityConfig): igual que se puede ver el anuncio de alguien sin iniciar sesión,
-    // se puede ver el nombre de quien lo publicó.
+    /**
+     * Devuelve el perfil público mínimo (sin email ni otros datos sensibles) de un usuario,
+     * para mostrar quién es el otro participante de una conversación o el vendedor de un anuncio.
+     * Es un endpoint público a propósito (ver SecurityConfig): igual que se puede ver el anuncio
+     * de alguien sin iniciar sesión, se puede ver el nombre de quien lo publicó.
+     *
+     * @param id id del usuario cuyo perfil público se quiere consultar
+     * @return HTTP 200 (OK) con id, nombre a mostrar, avatar y rating agregado del usuario
+     * @throws UserNotFoundException si no existe ningún usuario con ese id
+     */
     @GetMapping("/{id}")
     public ResponseEntity<UserPublicResponse> getPublicProfile(@PathVariable String id) {
         User user = userRepository.findById(id)

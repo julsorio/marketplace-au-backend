@@ -17,12 +17,25 @@ import com.dev.marketplace.api.service.FavoriteService;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Expone los endpoints REST para que un usuario gestione sus listings favoritos:
+ * añadirlos, quitarlos y consultar su lista de favoritos.
+ */
 @RestController
 @RequestMapping("/favorites")
 @RequiredArgsConstructor
 public class FavoriteController {
     private final FavoriteService favoriteService;
 
+    /**
+     * Marca un listing como favorito del usuario autenticado.
+     * La operación es idempotente: si el listing ya era favorito, no ocurre nada
+     * y la respuesta sigue siendo satisfactoria.
+     *
+     * @param principal usuario autenticado
+     * @param listingId identificador del listing a marcar como favorito
+     * @return 204 (NO CONTENT) si la operación se completa correctamente
+     */
     @PostMapping("/{listingId}")
     public ResponseEntity<Void> addFavorite(
             @AuthenticationPrincipal UserPrincipal principal,
@@ -31,6 +44,13 @@ public class FavoriteController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * Quita un listing de los favoritos del usuario autenticado.
+     *
+     * @param principal usuario autenticado
+     * @param listingId identificador del listing a quitar de favoritos
+     * @return 204 (NO CONTENT) si la operación se completa correctamente
+     */
     @DeleteMapping("/{listingId}")
     public ResponseEntity<Void> removeFavorite(
             @AuthenticationPrincipal UserPrincipal principal,
@@ -39,6 +59,13 @@ public class FavoriteController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * Obtiene la lista de favoritos del usuario autenticado, con el detalle completo
+     * de cada listing favorito (no solo su identificador).
+     *
+     * @param principal usuario autenticado
+     * @return listado de favoritos del usuario
+     */
     @GetMapping
     public ResponseEntity<List<FavoriteResponse>> getMyFavorites(
             @AuthenticationPrincipal UserPrincipal principal) {

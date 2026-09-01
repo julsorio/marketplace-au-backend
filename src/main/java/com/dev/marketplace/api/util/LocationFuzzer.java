@@ -29,6 +29,15 @@ public final class LocationFuzzer {
     private LocationFuzzer() {
     }
 
+    /**
+     * Calcula un punto desplazado aleatoriamente respecto a {@code exactLocation}, dentro de
+     * un radio de {@value #RADIUS_METERS} metros, usando el hash de {@code listingId} como
+     * semilla para que el resultado sea siempre el mismo para un mismo listing.
+     *
+     * @param exactLocation ubicación geográfica real del listing (longitud, latitud)
+     * @param listingId identificador del listing, usado como semilla determinista del desplazamiento
+     * @return un array {@code [latitud, longitud]} con el punto difuminado
+     */
     public static double[] fuzz(GeoJsonPoint exactLocation, String listingId) {
         double exactLat = exactLocation.getY();
         double exactLng = exactLocation.getX();

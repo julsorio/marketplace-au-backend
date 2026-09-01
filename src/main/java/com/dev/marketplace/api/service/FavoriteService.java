@@ -16,6 +16,10 @@ import com.dev.marketplace.api.util.LocationFuzzer;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Contiene la lógica de negocio de los listings favoritos de un usuario:
+ * añadirlos, quitarlos y consultarlos con el detalle completo del listing asociado.
+ */
 @Service
 @RequiredArgsConstructor
 public class FavoriteService {
@@ -23,13 +27,25 @@ public class FavoriteService {
     private final FavoriteRepository favoriteRepository;
     private final ListingRepository listingRepository;
 
+    /**
+     * Marca un listing como favorito del usuario.
+     * La operación es idempotente: si el listing ya era favorito, el método no hace nada
+     * y no se lanza ningún error. Además, si dos peticiones concurrentes intentan añadir
+     * el mismo favorito por primera vez a la vez, el índice único de la colección puede
+     * rechazar la segunda inserción; esa {@link DuplicateKeyException} se captura y se
+     * ignora, porque el resultado final (el favorito existe) es el deseado.
+     *
+     * @param userId    identificador del usuario que añade el favorito
+     * @param listingId identificador del listing a marcar como favorito
+     * @throws ListingNotFoundException si el listing indicado no existe
+     */
     public void addFavorite(String userId, String listingId) {
         if (!listingRepository.existsById(listingId)) {
             throw new ListingNotFoundException(listingId);
         }
 
         if (favoriteRepository.existsByUserIdAndListingId(userId, listingId)) {
-            return; // ya es favorito, operación idempotente — no lanzamos error
+            return;
         }
 
         Favorite favorite = new Favorite();
@@ -44,10 +60,26 @@ public class FavoriteService {
         }
     }
 
+    /**
+     * Quita un listing de los favoritos del usuario. Si no estaba marcado como favorito,
+     * no ocurre nada.
+     *
+     * @param userId    identificador del usuario
+     * @param listingId identificador del listing a quitar de favoritos
+     */
     public void removeFavorite(String userId, String listingId) {
         favoriteRepository.deleteByUserIdAndListingId(userId, listingId);
     }
 
+    /**
+     * Obtiene la lista de favoritos del usuario con el detalle completo de cada listing
+     * (no solo sus identificadores), para que el cliente no tenga que hacer una consulta
+     * adicional por cada favorito. Los favoritos cuyo listing ya no existe (fue eliminado)
+     * se omiten del resultado, aunque el registro de favorito en sí siga existiendo.
+     *
+     * @param userId identificador del usuario
+     * @return listado de favoritos del usuario, con el detalle de cada listing
+     */
     public List<FavoriteResponse> getFavorites(String userId) {
         List<Favorite> favorites = favoriteRepository.findByUserId(userId);
 
@@ -63,9 +95,18 @@ public class FavoriteService {
                 .toList();
     }
 
-    // userId es quien está consultando sus favoritos; casi siempre será distinto del
-    // sellerId del listing favorito, así que en la práctica esto casi siempre difumina.
-    // Se comprueba igual por si alguna vez alguien marca como favorito su propio anuncio.
+    /**
+     * Convierte un {@link Listing} en su DTO de respuesta, difuminando su ubicación salvo
+     * que el que consulta sea el propio vendedor del listing.
+     * El parámetro {@code viewerId} es quien está consultando sus favoritos; casi siempre
+     * será distinto del vendedor del listing favorito, así que en la práctica esto casi
+     * siempre difumina la ubicación. Se comprueba igual por si alguna vez alguien marca
+     * como favorito su propio anuncio.
+     *
+     * @param l        listing a convertir
+     * @param viewerId identificador del usuario que consulta sus favoritos
+     * @return el DTO de respuesta del listing, con la ubicación difuminada si corresponde
+     */
     private ListingResponse toListingResponse(Listing l, String viewerId) {
         Double latitude = null;
         Double longitude = null;
