@@ -9,4 +9,5 @@ import com.dev.marketplace.api.model.User;
 public interface UserRepository extends MongoRepository<User, String> {
  Optional<User> findByEmail(String email);
     boolean existsByEmail(String email);
+    Optional<User> findByStripeAccountId(String stripeAccountId);
 }

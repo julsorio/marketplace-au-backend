@@ -40,6 +40,7 @@ public class UserController {
                 .orElseThrow(() -> new UserNotFoundException(id));
 
         return ResponseEntity.ok(
-                new UserPublicResponse(user.getId(), user.getDisplayName(), user.getAvatarUrl(), user.getRating()));
+                new UserPublicResponse(user.getId(), user.getDisplayName(), user.getAvatarUrl(), user.getRating(),
+                        user.isStripePayoutsEnabled()));
     }
 }

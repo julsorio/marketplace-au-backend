@@ -40,4 +40,10 @@ public class User {
 
     private Instant createdAt = Instant.now();
     private String status = "active";
+
+    /** Cuenta conectada (Express) de Stripe Connect, para cobrar ventas con tarjeta. */
+    @Indexed(sparse = true)
+    private String stripeAccountId;
+    /** {@code true} cuando Stripe ya permite transferir dinero a esa cuenta (alta completada). */
+    private boolean stripePayoutsEnabled;
 }
