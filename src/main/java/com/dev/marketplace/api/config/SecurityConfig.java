@@ -52,6 +52,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/listings/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/reviews/**").permitAll()
                         .requestMatchers("/categories/**").permitAll()
+                        // lo llama Stripe sin JWT; se autentica por la firma (ver PaymentController)
+                        .requestMatchers(HttpMethod.POST, "/payments/webhook").permitAll()
                         // /user/me va antes que /user/{id}: la regla más específica debe
                         // evaluarse primero para que "me" no caiga en el permitAll de abajo
                         .requestMatchers(HttpMethod.GET, "/user/me").authenticated()
