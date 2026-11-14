@@ -40,12 +40,17 @@ public class ListingController {
                 .body(listingService.create(principal.getUserId(), request));
     }
 
+    // trackView solo debe ir a true desde la pantalla de detalle del anuncio (una visita
+    // real); el resto de pantallas (conversaciones, transacciones) también llaman a este
+    // mismo endpoint para enriquecer sus listas con título/imagen del listing, y eso no debe
+    // contar como una visualización.
     @GetMapping("/{id}")
     public ResponseEntity<ListingResponse> getById(
             @AuthenticationPrincipal UserPrincipal principal,
-            @PathVariable String id) {
+            @PathVariable String id,
+            @RequestParam(required = false, defaultValue = "false") boolean trackView) {
         String viewerId = principal != null ? principal.getUserId() : null;
-        return ResponseEntity.ok(listingService.getById(id, viewerId));
+        return ResponseEntity.ok(listingService.getById(id, viewerId, trackView));
     }
 
     @GetMapping

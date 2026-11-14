@@ -143,4 +143,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "Bad Request", ex.getMessage()));
     }
+    
+    @ExceptionHandler(SelfMessagingNotAllowedException.class)
+    public ResponseEntity<ErrorResponse> handleSelfMessagingNotAllowed(SelfMessagingNotAllowedException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "Bad Request", ex.getMessage()));
+    }
 }
